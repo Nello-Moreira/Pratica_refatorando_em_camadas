@@ -39,4 +39,12 @@ async function authenticate({ email, password }) {
 	return token;
 }
 
-export default { authenticate, registerUser };
+function activeSession(token) {
+	try {
+		return jwt.verify(token, process.env.JWT_SECRET);
+	} catch {
+		return false;
+	}
+}
+
+export default { authenticate, registerUser, activeSession };
