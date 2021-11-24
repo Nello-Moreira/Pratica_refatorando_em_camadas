@@ -7,7 +7,8 @@ async function tokenMiddleware(req, res, next) {
 	if (!token) return res.sendStatus(401);
 
 	try {
-		jwt.verify(token, process.env.JWT_SECRET);
+		let user = jwt.verify(token, process.env.JWT_SECRET);
+		req.userId = user.id;
 	} catch {
 		return res.sendStatus(401);
 	}

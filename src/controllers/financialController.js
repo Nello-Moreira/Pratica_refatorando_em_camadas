@@ -2,8 +2,7 @@ import jwt from 'jsonwebtoken';
 import financialService from '../services/financialService';
 
 async function postFinancialEvent(req, res) {
-	const authorization = req.headers.authorization || '';
-	const token = authorization.split('Bearer ')[1];
+	const userId = req.userId;
 	const { value, type } = req.body;
 
 	if (!value || !type) {
@@ -18,20 +17,15 @@ async function postFinancialEvent(req, res) {
 		return res.sendStatus(400);
 	}
 
-	let user = jwt.verify(token, process.env.JWT_SECRET);
-
-	await financialService.saveEvent({ userId: user.id, value, type });
+	await financialService.saveEvent({ userId, value, type });
 
 	res.sendStatus(201);
 }
 
 async function getFinancialEvents(req, res) {
-	const authorization = req.headers.authorization || '';
-	const token = authorization.split('Bearer ')[1];
+	const userId = req.userId;
 
-	let user = jwt.verify(token, process.env.JWT_SECRET);
-
-	const events = await financialService.searchEvents(user.id);
+	const events = await financialService.searchEvents(userId);
 
 	if (!events) {
 		return res.sendStatus(500);
@@ -41,12 +35,9 @@ async function getFinancialEvents(req, res) {
 }
 
 async function getSum(req, res) {
-	const authorization = req.headers.authorization || '';
-	const token = authorization.split('Bearer ')[1];
+	const userId = req.userId;
 
-	let user = jwt.verify(token, process.env.JWT_SECRET);
-
-	const sum = await financialService.getSum(user.id);
+	const sum = await financialService.getSum(userId);
 
 	if (sum === null) {
 		return res.sendStatus(500);
