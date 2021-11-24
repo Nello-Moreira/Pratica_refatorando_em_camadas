@@ -25,4 +25,19 @@ async function postFinancialEvent(req, res) {
 	res.sendStatus(201);
 }
 
-export default { postFinancialEvent };
+async function getFinancialEvents(req, res) {
+	const authorization = req.headers.authorization || '';
+	const token = authorization.split('Bearer ')[1];
+
+	let user = jwt.verify(token, process.env.JWT_SECRET);
+
+	const events = await financialService.searchEvents(user.id);
+
+	if (!events) {
+		return res.sendStatus(500);
+	}
+
+	return res.send(events.rows);
+}
+
+export default { postFinancialEvent, getFinancialEvents };

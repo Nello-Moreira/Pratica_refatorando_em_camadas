@@ -8,4 +8,8 @@ async function saveEvent({ userId, value, type }) {
 	});
 }
 
-export default { saveEvent };
+async function searchEvents(userId) {
+	return await financialRepository.searchFinancialEvent(userId);
+}
+
+export default { saveEvent, searchEvents };
