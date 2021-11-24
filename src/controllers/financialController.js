@@ -40,4 +40,19 @@ async function getFinancialEvents(req, res) {
 	return res.send(events.rows);
 }
 
-export default { postFinancialEvent, getFinancialEvents };
+async function getSum(req, res) {
+	const authorization = req.headers.authorization || '';
+	const token = authorization.split('Bearer ')[1];
+
+	let user = jwt.verify(token, process.env.JWT_SECRET);
+
+	const sum = await financialService.getSum(user.id);
+
+	if (sum === null) {
+		return res.sendStatus(500);
+	}
+
+	return res.send({ sum });
+}
+
+export default { postFinancialEvent, getFinancialEvents, getSum };
