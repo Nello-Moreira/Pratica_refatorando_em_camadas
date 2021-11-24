@@ -1,7 +1,3 @@
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import connection from '../database.js';
-
 import userService from '../services/userService.js';
 
 async function signUp(req, res) {
@@ -29,39 +25,23 @@ async function signUp(req, res) {
 }
 
 async function signIn(req, res) {
-	try {
-		const { email, password } = req.body;
+	const { email, password } = req.body;
 
-		if (!email || !password) {
-			return res.sendStatus(400);
-		}
-
-		const user = await connection.query(
-			`SELECT * FROM "users" WHERE "email"=$1`,
-			[email]
-		);
-
-		if (
-			!user.rows[0] ||
-			!bcrypt.compareSync(password, user.rows[0].password)
-		) {
-			return res.sendStatus(401);
-		}
-
-		const token = jwt.sign(
-			{
-				id: user.rows[0].id,
-			},
-			process.env.JWT_SECRET
-		);
-
-		res.send({
-			token,
-		});
-	} catch (err) {
-		console.error(err);
-		res.sendStatus(500);
+	if (!email || !password) {
+		return res.sendStatus(400);
 	}
+
+	const token = await userService.authenticate({ email, password });
+
+	if (token === null) {
+		return res.sendStatus(500);
+	}
+
+	if (token === false) {
+		return res.sendStatus(401);
+	}
+
+	return res.send({ token });
 }
 
 export default { signUp, signIn };

@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import userRepository from '../repositories/userRepository.js';
+import jwt from 'jsonwebtoken';
 
 async function registerUser({ name, email, password }) {
 	const user = await userRepository.searchUserByEmail(email);
@@ -19,6 +20,23 @@ async function registerUser({ name, email, password }) {
 	return true;
 }
 
-async function authenticate({ email, password }) {}
+async function authenticate({ email, password }) {
+	const user = await userRepository.searchUserByEmail(email);
+
+	if (!user) return null;
+
+	if (!user.rows[0] || !bcrypt.compareSync(password, user.rows[0].password)) {
+		return false;
+	}
+
+	const token = jwt.sign(
+		{
+			id: user.rows[0].id,
+		},
+		process.env.JWT_SECRET
+	);
+
+	return token;
+}
 
 export default { authenticate, registerUser };
